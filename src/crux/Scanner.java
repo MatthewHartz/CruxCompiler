@@ -1,9 +1,7 @@
 package crux;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 public class Scanner implements Iterable<Token> {
 	public static String studentName = "Matthew Hartz";
