@@ -38,6 +38,14 @@ public class Scanner implements Iterable<Token> {
 	}
 	
 	private void readNewLine() {
+		// to handle comments
+		while (!IsNewLine(nextChar)) {
+			if (nextChar == -1) {
+				return;
+			}
+			nextChar = readChar();
+		}
+		
 		while (IsNewLine(nextChar)) {
 			nextChar = readChar();
 		}
@@ -60,7 +68,7 @@ public class Scanner implements Iterable<Token> {
 	}
 	
 	private Boolean IsNewLine(int character) {
-		if (character == 13 || character == 10) {
+		if (character == 10) {
 			return true;
 		}
 		else {
@@ -96,42 +104,25 @@ public class Scanner implements Iterable<Token> {
 				while (IsNewLine(nextChar) && nextChar != -1) {
 					nextChar = readChar();
 				}
-				// jump to next line position 1
-				//lNum = lineNum;
-				//cPos = charPos;
 				
+				// if comment is on the last line of the file, return the EOF token
 				if (nextChar == -1) {
 					return Token.GetToken("EOF", "", lineNum, charPos);
 				}
 				
+				// else move on to next line
 				readNewLine();
-				
-				// If comment ended the program (nextChar == EOF), subtract one position
-				/*if (nextChar == -1) {
-					return Token.GetToken("EOF", "", lNum, cPos);
-				}
-				
-				// reset variables as if this block was never entered.
-				cPos = ClearWhitespace();
-				lNum = lineNum;
-				s = "";	
+				return next();
 			}
 			
-			
+			// special case for 2 character tokens
 			if (Kind.matches(s + (char)nextChar)) {
-				return next();
-				/*
-				while (Kind.matches(s + (char)nextChar))
-				{
-					s += (char)nextChar;
-					nextChar = readChar();
-				}
-				
+				s += (char)nextChar;
+				nextChar = readChar();
 				return Token.GetToken("", s, lNum, cPos);
-				*/
-				return next();
-			}	
-			return Token.GetToken("", s, lNum, cPos);
+			} else {
+				return Token.GetToken("", s, lNum, cPos);
+			}
 		}
 		
 		
