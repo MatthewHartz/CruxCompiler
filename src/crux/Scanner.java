@@ -3,6 +3,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Iterator;
 
+import crux.Token.Kind;
+
 public class Scanner implements Iterable<Token> {
 	public static String studentName = "Matthew Hartz";
 	public static String studentID = "87401675";
