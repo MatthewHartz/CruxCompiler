@@ -151,14 +151,21 @@ public class Parser {
    
 // Grammar Rules =====================================================
     
-    // literal := INTEGER | FLOAT | TRUE | FALSE .
+    // should be done
     public void literal()
     {
     	enterRule(NonTerminal.LITERAL);
+    	if (accept(Token.Kind.INTEGER)) {
+    	} else if (accept(Token.Kind.FLOAT)) {
+    	} else if (accept(Token.Kind.TRUE)) {    		
+    	} else if (accept(Token.Kind.FALSE)) {	
+    	} else {
+    		reportSyntaxError(NonTerminal.LITERAL);
+    	}
     	exitRule(NonTerminal.LITERAL);
     }
     
-    // designator := IDENTIFIER { "[" expression0 "]" } .
+    // should be done
     public void designator()
     {
         enterRule(NonTerminal.DESIGNATOR);
@@ -172,28 +179,57 @@ public class Parser {
         exitRule(NonTerminal.DESIGNATOR);
     }
     
+    // should be done
     public void type() {
     	enterRule(NonTerminal.TYPE);
+    	
     	expect(Token.Kind.IDENTIFIER);
+    	
     	exitRule(NonTerminal.TYPE);
     }
     
+    // should be done
     public void op0() {
     	enterRule(NonTerminal.OP0);
+    	
+    	if (accept(Token.Kind.GREATER_EQUAL)) {
+    	} else if (accept(Token.Kind.LESSER_EQUAL)) {
+    	} else if (accept(Token.Kind.NOT_EQUAL)) {
+    	} else if (accept(Token.Kind.EQUAL)) {
+    	} else if (accept(Token.Kind.GREATER_THAN)) {
+    	} else if (accept(Token.Kind.LESS_THAN)) {
+    	} else {
+    		reportSyntaxError(NonTerminal.OP0);
+    	}
+    	
     	exitRule(NonTerminal.OP0);
     }
     
+    // should be done
     public void op1() {
     	enterRule(NonTerminal.OP1);
+    	if (accept(Token.Kind.ADD)) {
+    	} else if (accept(Token.Kind.SUB)) {
+    	} else if (accept(Token.Kind.OR)) {    		
+    	} else {
+    		reportSyntaxError(NonTerminal.OP1);
+    	}
     	exitRule(NonTerminal.OP1);
     }
     
+    // should be done
     public void op2() {
     	enterRule(NonTerminal.OP2);
+    	if (accept(Token.Kind.MUL)) {
+    	} else if (accept(Token.Kind.DIV)) {
+    	} else if (accept(Token.Kind.AND)) {    		
+    	} else {
+    		reportSyntaxError(NonTerminal.OP2);
+    	}
     	exitRule(NonTerminal.OP2);
     }
 
-    // program := declaration-list EOF .
+    // should be done
     public void program()
     {
     	enterRule(NonTerminal.PROGRAM);
@@ -202,52 +238,114 @@ public class Parser {
     	exitRule(NonTerminal.PROGRAM);
     }
     
-    public void statementblock() {
+    // should be done
+    public void statementBlock() {
     	enterRule(NonTerminal.STATEMENT_BLOCK);
+    	
     	expect(Token.Kind.OPEN_BRACE);
     	statementList();
     	expect(Token.Kind.CLOSE_BRACE);
+    	
     	exitRule(NonTerminal.STATEMENT_BLOCK);
     }
     
+    // should be done
     public void statementList() {
     	enterRule(NonTerminal.STATEMENT_LIST);
-    	while (have(NonTerminal.STATEMENT)) { } // loop for all statements
+    	
+    	while (have(NonTerminal.STATEMENT)) { 
+    		statement();
+    	} // loop for all statements
+    	
     	exitRule(NonTerminal.STATEMENT_LIST);
     }
     
+    // should be done
     public void statement()
     {
     	enterRule(NonTerminal.STATEMENT);
+    	
+    	if (have(NonTerminal.VARIABLE_DECLARATION)) {
+    		variableDeclaration();
+    	} else if (have(NonTerminal.CALL_STATEMENT)) {
+    		callStatement();
+    	} else if (have(NonTerminal.ASSIGNMENT_STATEMENT)) {
+    		assignmentStatement();
+    	} else if (have(NonTerminal.IF_STATEMENT)) {
+    		ifStatement();
+    	} else if (have(NonTerminal.WHILE_STATEMENT)) {
+    		whileStatement();
+    	} else if (have(NonTerminal.RETURN_STATEMENT)) {
+    		returnStatement();
+    	} else {
+    		reportSyntaxError(NonTerminal.STATEMENT);
+    	}
+    	
     	exitRule(NonTerminal.STATEMENT);
     }
     
+    // should be done
     public void returnStatement() {
     	enterRule(NonTerminal.RETURN_STATEMENT);
+    	
+    	expect(Token.Kind.RETURN);
+    	expression0();
+    	expect(Token.Kind.SEMICOLON);
+    	
     	exitRule(NonTerminal.RETURN_STATEMENT);
     }
     
+    // should be done
     public void whileStatement() {
     	enterRule(NonTerminal.WHILE_STATEMENT);
+    	
+    	expect(Token.Kind.WHILE);
+    	expression0();
+    	statementBlock();
+    	
     	exitRule(NonTerminal.WHILE_STATEMENT);
     }
     
+    // should be done
     public void ifStatement()
     {
     	enterRule(NonTerminal.IF_STATEMENT);
+    	
+    	expect(Token.Kind.IF);
+    	expression0();
+    	statementBlock();
+    	
+    	if (accept(Token.Kind.ELSE)) {
+    		statementBlock();
+    	}
+    	
     	exitRule(NonTerminal.IF_STATEMENT);
     }
     
+    // should be done
     public void callStatement() {
     	enterRule(NonTerminal.CALL_STATEMENT);
+    	
+    	callExpression();
+    	expect(Token.Kind.SEMICOLON);
+    	
     	exitRule(NonTerminal.CALL_STATEMENT);
     }
     
+    // should be done
     public void assignmentStatement() {
     	enterRule(NonTerminal.ASSIGNMENT_STATEMENT);
+    	
+    	expect(Token.Kind.LET);
+    	designator();
+    	expect(Token.Kind.ASSIGN);
+    	expression0();
+    	expect(Token.Kind.SEMICOLON);
+    	
     	exitRule(NonTerminal.ASSIGNMENT_STATEMENT);
     }
     
+    // should be done
     public void declarationList()
     {
     	enterRule(NonTerminal.DECLARATION_LIST);
@@ -257,6 +355,7 @@ public class Parser {
     	exitRule(NonTerminal.DECLARATION_LIST);
     }
     
+    // should be done
     public void declaration() {
     	enterRule(NonTerminal.DECLARATION);
     	if (have(NonTerminal.VARIABLE_DECLARATION)) {
@@ -265,68 +364,179 @@ public class Parser {
     		arrayDeclaration();
     	} else if (have(NonTerminal.FUNCTION_DEFINITION)) {
     		functionDefinition();
+    	} else {
+    		reportSyntaxError(NonTerminal.DECLARATION);
     	}
     	exitRule(NonTerminal.DECLARATION);
     }
     
     public void functionDefinition() {
     	enterRule(NonTerminal.FUNCTION_DEFINITION);
-    	expect(Token.Kind.VAR);
+    	
+    	expect(Token.Kind.FUNC);
     	expect(Token.Kind.IDENTIFIER);
+    	expect(Token.Kind.OPEN_PAREN);    	
+
+    	parameterList();
+    	
+    	expect(Token.Kind.CLOSE_PAREN);
+    	expect(Token.Kind.COLON);
+
+    	type();
+    	statementBlock();
+    	
     	exitRule(NonTerminal.FUNCTION_DEFINITION);
     }
     
+    // should be done
     public void arrayDeclaration()
     {
     	enterRule(NonTerminal.ARRAY_DECLARATION);
+    	
+    	expect(Token.Kind.ARRAY);
+    	expect(Token.Kind.IDENTIFIER);
+    	expect(Token.Kind.COLON);
+    	type();
+    	expect(Token.Kind.OPEN_BRACKET);
+    	expect(Token.Kind.INTEGER);
+    	expect(Token.Kind.CLOSE_BRACKET);
+    	
+    	while(accept(Token.Kind.OPEN_BRACKET)) {
+    		expect(Token.Kind.INTEGER);
+    		expect(Token.Kind.CLOSE_BRACKET);
+    	}
+    	
+    	expect(Token.Kind.SEMICOLON);
+    	
     	exitRule(NonTerminal.ARRAY_DECLARATION);
     }
     
+    // should be done
     public void variableDeclaration() {
     	enterRule(NonTerminal.VARIABLE_DECLARATION);
+    	
+    	expect(Token.Kind.VAR);
+    	expect(Token.Kind.IDENTIFIER);
+    	expect(Token.Kind.COLON);
+    	type();
+    	expect(Token.Kind.SEMICOLON);
+    	
     	exitRule(NonTerminal.VARIABLE_DECLARATION);
     }
     
+    // should be done
     public void parameterList() {
     	enterRule(NonTerminal.PARAMETER_LIST);
+    	
+    	if (have(NonTerminal.PARAMETER)) {
+    		parameter();
+    		while(accept(Token.Kind.COMMA)) {
+    			parameter();
+    		}
+    	}
+    	
     	exitRule(NonTerminal.PARAMETER_LIST);
     }
     
+    // should be done
     public void parameter()
     {
     	enterRule(NonTerminal.PARAMETER);
+    	
+    	expect(Token.Kind.IDENTIFIER);
+    	expect(Token.Kind.COLON);
+    	type();
+    	
     	exitRule(NonTerminal.PARAMETER);
     }
     
+    // should be done
     public void expressionList() {
     	enterRule(NonTerminal.EXPRESSION_LIST);
+    	
+    	if(have(NonTerminal.EXPRESSION0)) {
+    		expression0();
+    		while(accept(Token.Kind.COMMA)) {
+    			expression0();
+    		}
+    	}
+    	
     	exitRule(NonTerminal.EXPRESSION_LIST);
     }
     
+    // should be done
     public void callExpression() {
     	enterRule(NonTerminal.CALL_EXPRESSION);
+    	
+    	expect(Token.Kind.CALL);
+    	expect(Token.Kind.IDENTIFIER);
+    	expect(Token.Kind.OPEN_PAREN);
+    	expressionList();
+    	expect(Token.Kind.CLOSE_PAREN);    	
+    	
     	exitRule(NonTerminal.CALL_EXPRESSION);
     }
     
+    // should be done
     public void expression3()
     {
     	enterRule(NonTerminal.EXPRESSION3);
+    	
+    	if (accept(Token.Kind.NOT)) {
+    		expression3();
+    	} else if (accept(Token.Kind.OPEN_PAREN)) {
+    		expression0();
+    		expect(Token.Kind.CLOSE_PAREN);
+    	} else if (have(NonTerminal.DESIGNATOR)) {    
+    		designator();
+    	} else if (have(NonTerminal.CALL_EXPRESSION)) {	
+    		callExpression();
+    	} else if (have(NonTerminal.LITERAL)) {
+    		literal();
+    	} else {
+    		reportSyntaxError(NonTerminal.EXPRESSION3);
+    	}
+    	
     	exitRule(NonTerminal.EXPRESSION3);
     }
     
+    // should be done
     public void expression2() {
     	enterRule(NonTerminal.EXPRESSION2);
+    	
+    	expression3();
+    	while(have(NonTerminal.OP2)) {
+    		op2();
+    		expression3();
+    	}
+    	
     	exitRule(NonTerminal.EXPRESSION2);
     }
     
+    // should be done
     public void expression1() {
     	enterRule(NonTerminal.EXPRESSION1);
+    	
+    	expression2();
+    	while(have(NonTerminal.OP1)) {
+    		op1();
+    		expression2();
+    	}
+    	
     	exitRule(NonTerminal.EXPRESSION1);
     }
     
+    // should be done
     public void expression0()
     {
     	enterRule(NonTerminal.EXPRESSION0);
+    	
+    	expression1();
+    	if(have(NonTerminal.OP0)) {
+    		op0();
+    		expression1();
+    	}
+    	
     	exitRule(NonTerminal.EXPRESSION0);
     } 
 }

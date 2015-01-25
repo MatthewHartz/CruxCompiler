@@ -11,10 +11,7 @@ public enum NonTerminal {
     DESIGNATOR(new HashSet<Token.Kind>() {
         private static final long serialVersionUID = 1L;
         {
-            add(Token.Kind.IDENTIFIER);  
-            add(Token.Kind.OPEN_BRACKET);
-            //addAll(EXPRESSION0.firstSet());
-            add(Token.Kind.CLOSE_BRACKET);
+            add(Token.Kind.IDENTIFIER);
         }}),
     TYPE(new HashSet<Token.Kind>() {
         private static final long serialVersionUID = 1L;
@@ -33,10 +30,6 @@ public enum NonTerminal {
         private static final long serialVersionUID = 1L;
         {
         	add(Token.Kind.CALL);
-        	add(Token.Kind.IDENTIFIER);
-        	add(Token.Kind.OPEN_PAREN);
-        	//addAll(EXPRESSION_LIST.firstSet());
-        	add(Token.Kind.CLOSE_PAREN);
         }}),
     OP0(new HashSet<Token.Kind>() {
         private static final long serialVersionUID = 1L;
@@ -66,10 +59,7 @@ public enum NonTerminal {
         private static final long serialVersionUID = 1L;
         {
         	add(Token.Kind.NOT);
-        	//addAll(EXPRESSION3.firstSet());
         	add(Token.Kind.OPEN_PAREN);
-        	//addAll(EXPRESSION0.firstSet());
-        	add(Token.Kind.CLOSE_PAREN);
         	addAll(DESIGNATOR.firstSet());
         	addAll(CALL_EXPRESSION.firstSet());
         	addAll(LITERAL.firstSet());
@@ -78,69 +68,46 @@ public enum NonTerminal {
         private static final long serialVersionUID = 1L;
         {
         	addAll(EXPRESSION3.firstSet());
-        	addAll(OP2.firstSet());
         }}),
     EXPRESSION1(new HashSet<Token.Kind>() {
         private static final long serialVersionUID = 1L;
         {
         	addAll(EXPRESSION2.firstSet());
-        	addAll(OP1.firstSet());
         }}),
     EXPRESSION0(new HashSet<Token.Kind>() {
         private static final long serialVersionUID = 1L;
         {
         	addAll(EXPRESSION1.firstSet());
-        	addAll(OP0.firstSet());
         }}),
     EXPRESSION_LIST(new HashSet<Token.Kind>() {
         private static final long serialVersionUID = 1L;
         {
         	addAll(EXPRESSION0.firstSet());
-        	add(Token.Kind.COMMA);
         }}),
     PARAMETER(new HashSet<Token.Kind>() {
         private static final long serialVersionUID = 1L;
         {
         	add(Token.Kind.IDENTIFIER);
-        	add(Token.Kind.COLON);
-        	addAll(TYPE.firstSet());
         }}),
     PARAMETER_LIST(new HashSet<Token.Kind>() {
         private static final long serialVersionUID = 1L;
         {
         	addAll(PARAMETER.firstSet());
-        	add(Token.Kind.COMMA);
         }}),
     VARIABLE_DECLARATION(new HashSet<Token.Kind>() {
         private static final long serialVersionUID = 1L;
         {
         	add(Token.Kind.VAR);
-        	add(Token.Kind.IDENTIFIER);
-        	addAll(TYPE.firstSet());
-        	add(Token.Kind.SEMICOLON);
         }}),
     ARRAY_DECLARATION(new HashSet<Token.Kind>() {
         private static final long serialVersionUID = 1L;
         {
         	add(Token.Kind.ARRAY);
-        	add(Token.Kind.IDENTIFIER);
-        	add(Token.Kind.COLON);
-        	addAll(TYPE.firstSet());
-        	add(Token.Kind.OPEN_BRACKET);
-        	add(Token.Kind.INTEGER);
-        	add(Token.Kind.CLOSE_BRACKET);
-        	add(Token.Kind.SEMICOLON);
         }}),
     FUNCTION_DEFINITION(new HashSet<Token.Kind>() {
         private static final long serialVersionUID = 1L;
         {
         	add(Token.Kind.FUNC);
-        	add(Token.Kind.IDENTIFIER);
-        	add(Token.Kind.OPEN_PAREN);
-        	addAll(PARAMETER_LIST.firstSet());
-        	add(Token.Kind.CLOSE_PAREN);
-        	add(Token.Kind.COLON);
-        	//addAll(STATEMENT_BLOCK.firstSet());
         }}),
     DECLARATION(new HashSet<Token.Kind>() {
         private static final long serialVersionUID = 1L;
@@ -158,45 +125,31 @@ public enum NonTerminal {
         private static final long serialVersionUID = 1L;
         {
         	add(Token.Kind.LET);
-        	addAll(DESIGNATOR.firstSet());
-        	add(Token.Kind.ASSIGN);
-        	addAll(EXPRESSION0.firstSet());
-        	add(Token.Kind.SEMICOLON);
         }}),
     CALL_STATEMENT(new HashSet<Token.Kind>() {
         private static final long serialVersionUID = 1L;
         {
         	addAll(CALL_EXPRESSION.firstSet());
-        	add(Token.Kind.SEMICOLON);
         }}),
     IF_STATEMENT(new HashSet<Token.Kind>() {
         private static final long serialVersionUID = 1L;
         {
         	add(Token.Kind.IF);
-        	addAll(EXPRESSION0.firstSet());
-        	//addAll(STATEMENT_BLOCK.firstSet());
-        	add(Token.Kind.ELSE);
         }}),
     WHILE_STATEMENT(new HashSet<Token.Kind>() {
         private static final long serialVersionUID = 1L;
         {
             add(Token.Kind.WHILE);
-            addAll(EXPRESSION0.firstSet());
-            //addAll(STATEMENT_BLOCK.firstSet());
         }}),
     RETURN_STATEMENT(new HashSet<Token.Kind>() {
         private static final long serialVersionUID = 1L;
         {
             add(Token.Kind.RETURN);
-            addAll(EXPRESSION0.firstSet());
-            add(Token.Kind.SEMICOLON);
         }}),
     STATEMENT_BLOCK(new HashSet<Token.Kind>() {
         private static final long serialVersionUID = 1L;
         {
-        	add(Token.Kind.OPEN_BRACE);  
-        	//addAll(STATEMENT_LIST.firstSet());
-        	add(Token.Kind.CLOSE_BRACE);  
+        	add(Token.Kind.OPEN_BRACE);
         }}),
     STATEMENT(new HashSet<Token.Kind>() {
         private static final long serialVersionUID = 1L;
