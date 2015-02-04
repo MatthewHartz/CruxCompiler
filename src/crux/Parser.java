@@ -11,6 +11,73 @@ public class Parser {
     public static String studentID = "87401675";
     public static String uciNetID = "hartzm";
     
+ // SymbolTable Management ==========================
+    private SymbolTable symbolTable;
+    
+    private void initSymbolTable()
+    {
+    	symbolTable = new SymbolTable();
+    	symbolTable.insert("readInt");
+    	symbolTable.insert("readFloat");
+    	symbolTable.insert("printBool");
+    	symbolTable.insert("printInt");
+    	symbolTable.insert("printFloat");
+    	symbolTable.insert("println");
+    }
+    
+    private void enterScope()
+    {
+    	SymbolTable s = new SymbolTable();
+    	s.parent = symbolTable;
+    	s.depth = symbolTable.depth + 1;
+    	symbolTable = s;
+    }
+    
+    private void exitScope()
+    {
+    	symbolTable = symbolTable.parent;
+    }
+
+    private Symbol tryResolveSymbol(Token ident)
+    {
+        assert(ident.is(Token.Kind.IDENTIFIER));
+        String name = ident.lexeme();
+        try {
+            return symbolTable.lookup(name);
+        } catch (SymbolNotFoundError e) {
+            String message = reportResolveSymbolError(name, ident.lineNumber(), ident.charPosition());
+            return new ErrorSymbol(message);
+        }
+    }
+
+    private String reportResolveSymbolError(String name, int lineNum, int charPos)
+    {
+        String message = "ResolveSymbolError(" + lineNum + "," + charPos + ")[Could not find " + name + ".]";
+        errorBuffer.append(message + "\n");
+        errorBuffer.append(symbolTable.toString() + "\n");
+        return message;
+    }
+
+    private Symbol tryDeclareSymbol(Token ident)
+    {
+        assert(ident.is(Token.Kind.IDENTIFIER));
+        String name = ident.lexeme();
+        try {
+            return symbolTable.insert(name);
+        } catch (RedeclarationError re) {
+            String message = reportDeclareSymbolError(name, ident.lineNumber(), ident.charPosition());
+            return new ErrorSymbol(message);
+        }
+    }
+
+    private String reportDeclareSymbolError(String name, int lineNum, int charPos)
+    {
+        String message = "DeclareSymbolError(" + lineNum + "," + charPos + ")[" + name + " already exists.]";
+        errorBuffer.append(message + "\n");
+        errorBuffer.append(symbolTable.toString() + "\n");
+        return message;
+    }    
+    
 // Grammar Rule Reporting ==========================================
     private int parseTreeRecursionDepth = 0;
     private StringBuffer parseTreeBuffer = new StringBuffer();
@@ -77,6 +144,7 @@ public class Parser {
     
     public void parse()
     {
+    	initSymbolTable();
         try {
             program();
         } catch (QuitParseException q) {
@@ -131,9 +199,36 @@ public class Parser {
         throw new QuitParseException(errorMessage);
         //return false;
     }
+    
+    private Token expectRetrieve(Token.Kind kind)
+    {
+        Token tok = currentToken;
+        if (accept(kind))
+            return tok;
+        String errorMessage = reportSyntaxError(kind);
+        throw new QuitParseException(errorMessage);
+        //return ErrorToken(errorMessage);
+    }
+        
+    private Token expectRetrieve(NonTerminal nt)
+    {
+        Token tok = currentToken;
+        if (accept(nt))
+            return tok;
+        String errorMessage = reportSyntaxError(nt);
+        throw new QuitParseException(errorMessage);
+        //return ErrorToken(errorMessage);
+    }
    
 // Grammar Rules =====================================================
     
+ // should be done
+    public void program()
+    {
+    	declarationList();
+    	expect(Token.Kind.EOF);
+    }
+       
     // should be done
     public void literal()
     {
@@ -149,7 +244,8 @@ public class Parser {
     // should be done
     public void designator()
     {
-        expect(Token.Kind.IDENTIFIER);
+    	Token id = expectRetrieve(Token.Kind.IDENTIFIER);
+    	tryResolveSymbol(id);
         while (accept(Token.Kind.OPEN_BRACKET)) {
             expression0();
             expect(Token.Kind.CLOSE_BRACKET);
@@ -193,19 +289,13 @@ public class Parser {
     		reportSyntaxError(NonTerminal.OP2);
     	}
     }
-
-    // should be done
-    public void program()
-    {
-    	declarationList();
-    	expect(Token.Kind.EOF);
-    }
     
     // should be done
     public void statementBlock() {
     	expect(Token.Kind.OPEN_BRACE);
     	statementList();
     	expect(Token.Kind.CLOSE_BRACE);
+    	exitScope();
     }
     
     // should be done
@@ -246,6 +336,9 @@ public class Parser {
     public void whileStatement() {
     	expect(Token.Kind.WHILE);
     	expression0();
+    	
+    	enterScope();
+    	
     	statementBlock();
     }
     
@@ -254,9 +347,14 @@ public class Parser {
     {
     	expect(Token.Kind.IF);
     	expression0();
+    	
+    	enterScope();
+    	
     	statementBlock();
     	
     	if (accept(Token.Kind.ELSE)) {
+    		enterScope();
+    		
     		statementBlock();
     	}
     }
@@ -299,9 +397,12 @@ public class Parser {
     
     public void functionDefinition() {
     	expect(Token.Kind.FUNC);
-    	expect(Token.Kind.IDENTIFIER);
-    	expect(Token.Kind.OPEN_PAREN);    	
+    	
+    	Token id = expectRetrieve(Token.Kind.IDENTIFIER);
+    	tryDeclareSymbol(id);
 
+    	expect(Token.Kind.OPEN_PAREN);    	   	
+    	enterScope();
     	parameterList();
     	
     	expect(Token.Kind.CLOSE_PAREN);
@@ -315,7 +416,8 @@ public class Parser {
     public void arrayDeclaration()
     {
     	expect(Token.Kind.ARRAY);
-    	expect(Token.Kind.IDENTIFIER);
+    	Token id = expectRetrieve(Token.Kind.IDENTIFIER);
+    	tryDeclareSymbol(id);
     	expect(Token.Kind.COLON);
     	type();
     	expect(Token.Kind.OPEN_BRACKET);
@@ -333,7 +435,8 @@ public class Parser {
     // should be done
     public void variableDeclaration() {
     	expect(Token.Kind.VAR);
-    	expect(Token.Kind.IDENTIFIER);
+    	Token id = expectRetrieve(Token.Kind.IDENTIFIER);
+    	tryDeclareSymbol(id);
     	expect(Token.Kind.COLON);
     	type();
     	expect(Token.Kind.SEMICOLON);
@@ -352,7 +455,8 @@ public class Parser {
     // should be done
     public void parameter()
     {
-    	expect(Token.Kind.IDENTIFIER);
+    	Token id = expectRetrieve(Token.Kind.IDENTIFIER);
+    	tryDeclareSymbol(id);
     	expect(Token.Kind.COLON);
     	type();
     }
@@ -370,7 +474,8 @@ public class Parser {
     // should be done
     public void callExpression() {
     	expect(Token.Kind.CALL);
-    	expect(Token.Kind.IDENTIFIER);
+    	Token id = expectRetrieve(Token.Kind.IDENTIFIER);
+    	tryResolveSymbol(id);
     	expect(Token.Kind.OPEN_PAREN);
     	expressionList();
     	expect(Token.Kind.CLOSE_PAREN);

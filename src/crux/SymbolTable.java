@@ -1,26 +1,55 @@
 package crux;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 public class SymbolTable {
+    public Map<String, Symbol> table;
+    public SymbolTable parent;
+    public int depth;
     
     public SymbolTable()
     {
-        throw new RuntimeException("implement this");
+        table = new LinkedHashMap<String, Symbol>();
+        parent = null;
+        depth = 0;
     }
     
     public Symbol lookup(String name) throws SymbolNotFoundError
-    {
-        throw new RuntimeException("implement this");
+    {    
+    	SymbolTable s = this;
+    	
+        do {
+        	Symbol value = s.table.get(name);
+        	
+        	if (value != null) {
+        		return value;
+        	} else {
+        		s = s.parent;
+        	}
+        } while (s != null);
+        
+    	   	
+        throw new SymbolNotFoundError(name);
     }
        
     public Symbol insert(String name) throws RedeclarationError
     {
-        throw new RuntimeException("implement this");
+        Symbol value = table.get(name);
+        if (value != null) {
+        	throw new RedeclarationError(value);
+        } else {
+        	return table.put(name, new Symbol(name));
+        }
     }
     
     public String toString()
     {
         StringBuffer sb = new StringBuffer();
-        if (/*I have a parent table*/)
+        if (parent != null)
             sb.append(parent.toString());
         
         String indent = new String();
@@ -28,7 +57,7 @@ public class SymbolTable {
             indent += "  ";
         }
         
-        for (/*Every symbol, s, in this table*/)
+        for (Symbol s : table.values())
         {
             sb.append(indent + s.toString() + "\n");
         }
