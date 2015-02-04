@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import crux.Token.Kind;
+
 public class Scanner implements Iterable<Token> {
 	public static String studentName = "Matthew Hartz";
 	public static String studentID = "87401675";

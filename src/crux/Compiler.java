@@ -6,6 +6,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import crux.Token.Kind;
+
 public class Compiler {
     public static String studentName = "Matthew Hartz";
     public static String studentID = "87401675";
