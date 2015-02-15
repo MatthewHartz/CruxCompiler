@@ -48,10 +48,10 @@ public class Scanner implements Iterable<Token> {
 		
 		while (IsNewLine(nextChar)) {
 			nextChar = readChar();
+			lineNum++;
 		}
 		
 		charPos = 1;
-		lineNum++;
 	}
 	
 	private Integer ClearWhitespace() {	
@@ -68,7 +68,7 @@ public class Scanner implements Iterable<Token> {
 	}
 	
 	private Boolean IsNewLine(int character) {
-		if (character == 10) {
+		if ((char)character == '\n') {
 			return true;
 		}
 		else {
