@@ -42,7 +42,9 @@ public class SymbolTable {
         if (value != null) {
         	throw new RedeclarationError(value);
         } else {
-        	return table.put(name, new Symbol(name));
+        	value = new Symbol(name);
+        	table.put(name, value);
+        	return value;
         }
     }
     

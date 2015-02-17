@@ -266,16 +266,22 @@ public class Parser {
     }
     
     // should be done
-    public ast.Index designator()
+    public ast.Expression designator()
     {
-    	
+    	int lineNum = lineNumber();
+    	int charPos = charPosition();
     	
     	Token id = expectRetrieve(Token.Kind.IDENTIFIER);
     	Symbol sym = tryResolveSymbol(id);
+    	
+    	ast.AddressOf expr = new ast.AddressOf(lineNum, charPos, sym);
         while (accept(Token.Kind.OPEN_BRACKET)) {
+        	
             expression0();
             expect(Token.Kind.CLOSE_BRACKET);
         }
+        
+        return expr;
     }
     
     // should be done
@@ -284,7 +290,7 @@ public class Parser {
     }
     
     // should be done
-    public ast.Expression op0() {
+    public Token op0() {
     	Token t = currentToken;
     	
     	if (accept(Token.Kind.GREATER_EQUAL)) {
@@ -294,32 +300,39 @@ public class Parser {
     	} else if (accept(Token.Kind.GREATER_THAN)) {
     	} else if (accept(Token.Kind.LESS_THAN)) {
     	} else {
-    		return new ast.Error(lineNumber(), charPosition(), reportSyntaxError(NonTerminal.OP0));
+    		//return new ast.Error(lineNumber(), charPosition(), reportSyntaxError(NonTerminal.OP0));
+    		//throw new SyntaxError();
+    		//return new Token();
     	}
     	
     	return t;
     }
     
     // should be done
-    public ast.Expression op1() {
+    public Token op1() {
+    	Token t = currentToken;
     	
     	if (accept(Token.Kind.ADD)) {
     	} else if (accept(Token.Kind.SUB)) {
     	} else if (accept(Token.Kind.OR)) {    		
     	} else {
-    		return new ast.Error(lineNumber(), charPosition(), reportSyntaxError(NonTerminal.OP1));
-    		
+    		//return new ast.Error(lineNumber(), charPosition(), reportSyntaxError(NonTerminal.OP1));    		
     	}
+    	return t;
     }
     
     // should be done
-    public void op2() {
+    public Token op2() {
+    	Token t = currentToken;
+    	
     	if (accept(Token.Kind.MUL)) {
     	} else if (accept(Token.Kind.DIV)) {
     	} else if (accept(Token.Kind.AND)) {    		
     	} else {
     		//return new ast.Error(lineNumber(), charPosition(), reportSyntaxError(NonTerminal.OP2));
     	}
+    	
+    	return t;
     }
     
     // should be done
@@ -449,6 +462,9 @@ public class Parser {
     }
     
     public ast.FunctionDefinition functionDefinition() {
+    	int lineNum = lineNumber();
+    	int charPos = charPosition();
+    	
     	expect(Token.Kind.FUNC);
     	
     	Token id = expectRetrieve(Token.Kind.IDENTIFIER);
@@ -464,12 +480,15 @@ public class Parser {
     	type();
     	ast.StatementList body = statementBlock();
     	
-    	return new ast.FunctionDefinition(lineNumber(), charPosition(), sym, args, body);
+    	return new ast.FunctionDefinition(lineNum, charPos, sym, args, body);
     }
     
     // should be done
     public ast.ArrayDeclaration arrayDeclaration()
     {
+    	int lineNum = lineNumber();
+    	int charPos = charPosition();
+    	
     	expect(Token.Kind.ARRAY);
     	Token id = expectRetrieve(Token.Kind.IDENTIFIER);
     	Symbol sym = tryDeclareSymbol(id);
@@ -486,11 +505,14 @@ public class Parser {
     	
     	expect(Token.Kind.SEMICOLON);
     	
-    	return new ast.ArrayDeclaration(lineNumber(), charPosition(), sym);
+    	return new ast.ArrayDeclaration(lineNum, charPos, sym);
     }
     
     // should be done
     public ast.VariableDeclaration variableDeclaration() {
+    	int lineNum = lineNumber();
+    	int charPos = charPosition();
+    	
     	expect(Token.Kind.VAR);
     	Token id = expectRetrieve(Token.Kind.IDENTIFIER);
     	Symbol sym = tryDeclareSymbol(id);
@@ -498,7 +520,7 @@ public class Parser {
     	type();
     	expect(Token.Kind.SEMICOLON);
     	
-    	return new ast.VariableDeclaration(lineNumber(), charPosition(), sym);
+    	return new ast.VariableDeclaration(lineNum, charPos, sym);
     }
     
     // should be done
@@ -541,6 +563,9 @@ public class Parser {
     
     // should be done
     public ast.Call callExpression() {
+    	int lineNum = lineNumber();
+    	int charPos = charPosition();
+    	
     	expect(Token.Kind.CALL);
     	Token id = expectRetrieve(Token.Kind.IDENTIFIER);
     	Symbol sym = tryResolveSymbol(id);
@@ -548,20 +573,23 @@ public class Parser {
     	ast.ExpressionList args = expressionList();
     	expect(Token.Kind.CLOSE_PAREN);
     	
-    	return new ast.Call(lineNumber(), charPosition(), sym, args);
+    	return new ast.Call(lineNum, charPos, sym, args);
     }
     
     // should be done
     public ast.Expression expression3()
     {
+    	Token curToken = currentToken;
+    	
     	if (accept(Token.Kind.NOT)) {
-    		return expression3();
+    		//return expression3();
+    		return Command.newExpression(expression3(), curToken, null);
     	} else if (accept(Token.Kind.OPEN_PAREN)) {
     		ast.Expression expr = expression0();
     		expect(Token.Kind.CLOSE_PAREN);
     		return expr;
     	} else if (have(NonTerminal.DESIGNATOR)) {    
-    		return designator();
+    		return new ast.Dereference(lineNumber(), charPosition(), designator());
     	} else if (have(NonTerminal.CALL_EXPRESSION)) {	
     		return callExpression();
     	} else if (have(NonTerminal.LITERAL)) {
@@ -573,35 +601,32 @@ public class Parser {
     
     // should be done
     public ast.Expression expression2() {
-    	expression3();
+    	ast.Expression expr = expression3();
     	while(have(NonTerminal.OP2)) {
-    		op2();
-    		expression3();
+    		expr = Command.newExpression(expr, op2(), expression3());
     	}
+    	
+    	return expr;
     }
     
     // should be done
     public ast.Expression expression1() {
-    	expression2();
+    	ast.Expression expr = expression2();
     	while(have(NonTerminal.OP1)) {
-    		op1();
-    		expression2();
+    		expr = Command.newExpression(expr, op1(), expression2());
     	}
+    	
+    	return expr;
     }
     
     // should be done
     public ast.Expression expression0()
     {
     	ast.Expression leftSide = expression1();
-    	ast.Expression rightSide;
-    	ast.Token op;
     	if(have(NonTerminal.OP0)) {
-    		ast.Comparison.Operation op = op0();
-    		rightSide = expression1();
+    		return Command.newExpression(leftSide, op0(), expression1());
     	}
     	
-    	return Command.newExpression(leftSide, op, rightSide);
-    	
-    	//return new ast.Comparison(lineNumber(), charPosition(), leftSide, operator, rightSide);
+    	return leftSide;
     } 
 }
