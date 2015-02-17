@@ -198,8 +198,8 @@ public class Token {
 		return tok;
 	}
 
-	public String kind() {
+	public Kind kind() {
 		// TODO Auto-generated method stub
-		return kind.toString();
+		return kind;
 	}
 }
