@@ -274,11 +274,14 @@ public class Parser {
     	Token id = expectRetrieve(Token.Kind.IDENTIFIER);
     	Symbol sym = tryResolveSymbol(id);
     	
-    	ast.AddressOf expr = new ast.AddressOf(lineNum, charPos, sym);
+    	ast.Expression expr = new ast.AddressOf(lineNum, charPos, sym);
         while (accept(Token.Kind.OPEN_BRACKET)) {
+        	lineNum = lineNumber();
+        	charPos = charPosition();
         	
-            expression0();
+            ast.Expression value = expression0();
             expect(Token.Kind.CLOSE_BRACKET);
+            expr = new ast.Index(lineNum, charPos, expr, value);
         }
         
         return expr;
@@ -377,15 +380,21 @@ public class Parser {
     
     // should be done
     public ast.Return returnStatement() {
+    	int lineNum = lineNumber();
+    	int charPos = charPosition();
+    	
     	expect(Token.Kind.RETURN);
     	ast.Expression expr = expression0();
     	expect(Token.Kind.SEMICOLON);
     	
-    	return new ast.Return(lineNumber(), charPosition(), expr);
+    	return new ast.Return(lineNum, charPos, expr);
     }
     
     // should be done
     public ast.WhileLoop whileStatement() {
+    	int lineNum = lineNumber();
+    	int charPos = charPosition();
+    	
     	expect(Token.Kind.WHILE);
     	ast.Expression expr = expression0();
     	
@@ -393,20 +402,22 @@ public class Parser {
     	
     	ast.StatementList body = statementBlock();
     	
-    	return new ast.WhileLoop(lineNumber(), charPosition(), expr, body);
+    	return new ast.WhileLoop(lineNum, charPos, expr, body);
     }
     
     // should be done
     public ast.IfElseBranch ifStatement()
     {
+    	int lineNum = lineNumber();
+    	int charPos = charPosition();
+    	
     	expect(Token.Kind.IF);
     	ast.Expression cond = expression0();
     	
     	enterScope();
     	
     	ast.StatementList ifBlock = statementBlock();
-    	
-    	ast.StatementList elseBlock = null;
+    	ast.StatementList elseBlock = new ast.StatementList(lineNumber(), charPosition());
     	
     	if (accept(Token.Kind.ELSE)) {
     		enterScope();
@@ -414,7 +425,7 @@ public class Parser {
     		elseBlock = statementBlock();
     	}
     	
-    	return new ast.IfElseBranch(lineNumber(), charPosition(), cond, ifBlock, elseBlock);
+    	return new ast.IfElseBranch(lineNum, charPos, cond, ifBlock, elseBlock);
     }
     
     // should be done
@@ -427,13 +438,16 @@ public class Parser {
     
     // should be done
     public ast.Assignment assignmentStatement() {
+    	int lineNum = lineNumber();
+    	int charPos = charPosition();
+    	
     	expect(Token.Kind.LET);
     	ast.Expression dest = designator();
     	expect(Token.Kind.ASSIGN);
     	ast.Expression source = expression0();
     	expect(Token.Kind.SEMICOLON);
     	
-    	return new ast.Assignment(lineNumber(), charPosition(), dest, source);
+    	return new ast.Assignment(lineNum, charPos, dest, source);
     }
     
     // should be done
