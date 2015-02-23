@@ -1,4 +1,6 @@
-LESSER_EQUAL(lineNum:1, charPos:1)
-EQUAL(lineNum:1, charPos:3)
-ASSIGN(lineNum:1, charPos:5)
-EOF(lineNum:2, charPos:1)
+Error type-checking file.
+TypeError(8,15)[Cannot negate int.]
+TypeError(8,3)[Cannot call func(TypeList(bool)):void using TypeList(ErrorType(Cannot negate int.)).]
+TypeError(9,15)[Cannot negate float.]
+TypeError(9,3)[Cannot call func(TypeList(bool)):void using TypeList(ErrorType(Cannot negate float.)).]
+

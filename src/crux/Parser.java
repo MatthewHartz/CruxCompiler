@@ -8,11 +8,19 @@ import java.util.Stack;
 
 import ast.Command;
 import ast.Expression;
+import types.*;
 
 public class Parser {
     public static String studentName = "Matthew Hartz";
     public static String studentID = "87401675";
     public static String uciNetID = "hartzm";
+    
+// Typing System ===================================
+    
+    private Type tryResolveType(String typeStr)
+    {
+        return Type.getBaseType(typeStr);
+    }
     
  // SymbolTable Management ==========================
     private SymbolTable symbolTable;
