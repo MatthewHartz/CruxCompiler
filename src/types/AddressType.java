@@ -6,7 +6,7 @@ public class AddressType extends Type {
     
     public AddressType(Type base)
     {
-        throw new RuntimeException("implement operators");
+        //throw new RuntimeException("implement operators");
         this.base = base;
     }
     

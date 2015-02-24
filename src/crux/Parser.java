@@ -296,8 +296,8 @@ public class Parser {
     }
     
     // should be done
-    public void type() {
-    	expect(Token.Kind.IDENTIFIER);
+    public Type type() {
+    	return tryResolveType(expectRetrieve(Token.Kind.IDENTIFIER).lexeme());
     }
     
     // should be done
@@ -499,7 +499,7 @@ public class Parser {
     	expect(Token.Kind.CLOSE_PAREN);
     	expect(Token.Kind.COLON);
 
-    	type();
+    	sym.setType(type());
     	ast.StatementList body = statementBlock();
     	
     	return new ast.FunctionDefinition(lineNum, charPos, sym, args, body);
@@ -515,7 +515,7 @@ public class Parser {
     	Token id = expectRetrieve(Token.Kind.IDENTIFIER);
     	Symbol sym = tryDeclareSymbol(id);
     	expect(Token.Kind.COLON);
-    	type();
+    	sym.setType(type());
     	expect(Token.Kind.OPEN_BRACKET);
     	expect(Token.Kind.INTEGER);
     	expect(Token.Kind.CLOSE_BRACKET);
@@ -539,7 +539,7 @@ public class Parser {
     	Token id = expectRetrieve(Token.Kind.IDENTIFIER);
     	Symbol sym = tryDeclareSymbol(id);
     	expect(Token.Kind.COLON);
-    	type();
+    	sym.setType(type());
     	expect(Token.Kind.SEMICOLON);
     	
     	return new ast.VariableDeclaration(lineNum, charPos, sym);
@@ -564,7 +564,7 @@ public class Parser {
     	Token id = expectRetrieve(Token.Kind.IDENTIFIER);
     	Symbol sym = tryDeclareSymbol(id);
     	expect(Token.Kind.COLON);
-    	type();
+    	sym.setType(type());
     	
     	return sym;
     }

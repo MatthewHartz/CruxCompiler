@@ -1,6 +1,9 @@
 package types;
 
 import java.util.HashMap;
+import java.util.List;
+
+import crux.Symbol;
 import ast.*;
 
 public class TypeChecker implements CommandVisitor {
@@ -69,42 +72,63 @@ public class TypeChecker implements CommandVisitor {
 
     @Override
     public void visit(ExpressionList node) {
-        throw new RuntimeException("Implement this");
+    	for (Expression e : node) {
+    		check((Command) e);
+    		Type type = getType((Command) e);
+    		put(node, type);
+    	}
     }
 
     @Override
     public void visit(DeclarationList node) {
-        throw new RuntimeException("Implement this");
+    	for (Declaration d : node) {
+    		check((Command) d);
+	    	Type type = getType((Command) d);
+			put(node, type);
+    	}
     }
 
     @Override
     public void visit(StatementList node) {
-        throw new RuntimeException("Implement this");
+    	for (Statement s : node) {
+    		check((Command) s);
+    		
+    		if (s instanceof ast.Return) {
+    			Type type = getType((Command) s);
+        		put(node, type);
+    		}
+    	}
+    	
+    	if (getType(node) == null) {
+    		put(node, new VoidType());
+    	}
     }
 
     @Override
     public void visit(AddressOf node) {
-        throw new RuntimeException("Implement this");
+    	//put(node, new AddressType(node.symbol().type()));
+    	put(node, node.symbol().type());
     }
 
     @Override
     public void visit(LiteralBool node) {
-        throw new RuntimeException("Implement this");
+    	put(node, new BoolType());
     }
 
     @Override
     public void visit(LiteralFloat node) {
-        throw new RuntimeException("Implement this");
+    	put(node, new FloatType());
     }
 
     @Override
     public void visit(LiteralInt node) {
-        throw new RuntimeException("Implement this");
+    	put(node, new IntType());
     }
 
     @Override
     public void visit(VariableDeclaration node) {
-        throw new RuntimeException("Implement this");
+        //throw new RuntimeException("Implement this");
+    	put(node, node.symbol().type());
     }
 
     @Override
@@ -114,7 +138,37 @@ public class TypeChecker implements CommandVisitor {
 
     @Override
     public void visit(FunctionDefinition node) {
-        throw new RuntimeException("Implement this");
+    	TypeList types = new TypeList();
+    	Symbol sym = node.symbol();
+    	Type symType = sym.type();
+    	
+    	List<Symbol> parameters = node.arguments();
+    	for (int i = 0; i < parameters.size(); i++) {
+    		if (parameters.get(i).type() instanceof VoidType) {
+    			put(node, new ErrorType("Function " + sym.name() + " has an void argument in position " + i));
+    		} else if (parameters.get(i).type() instanceof ErrorType) {
+    			put(node, new ErrorType("Function " + sym.name() + " has an void argument in position " + i + ": " + ((ErrorType)parameters.get(i).type()).getMessage()));
+    		}
+			types.append(parameters.get(i).type());
+    	}
+    	
+    	// if main does not return void, error.
+    	if (sym.name().equals("main") &&
+    			!(sym.type() instanceof VoidType)) {
+    		put(node, new ErrorType("Function main has invalid signature."));
+    	} else {
+    		check(node.body());
+    		
+    		Command returnNode = (Command)node.body();
+    		Type returnType = getType(returnNode);
+        	
+        	// check what was returned by function
+        	if (!symType.equivalent(returnType)) {
+        		put(returnNode, new ErrorType("Function " + sym.name() + " returns " + symType + " not " + returnType + "."));
+        	} else {
+        		put(node, new FuncType(types, symType));
+        	}
+    	}
     }
 
     @Override
@@ -124,7 +178,13 @@ public class TypeChecker implements CommandVisitor {
     
     @Override
     public void visit(Addition node) {
-        throw new RuntimeException("Implement this");
+    	check((Command) node.leftSide());
+    	check((Command) node.rightSide());
+    	
+    	Type left = getType((Command) node.leftSide());
+    	Type right = getType((Command) node.rightSide());
+
+    	put(node, left.add(right));
     }
     
     @Override
@@ -144,7 +204,13 @@ public class TypeChecker implements CommandVisitor {
     
     @Override
     public void visit(LogicalAnd node) {
-        throw new RuntimeException("Implement this");
+    	check((Command) node.leftSide());
+    	check((Command) node.rightSide());
+    	
+    	Type left = getType((Command) node.leftSide());
+    	Type right = getType((Command) node.rightSide());
+
+    	put(node, left.and(right));
     }
 
     @Override
@@ -159,7 +225,9 @@ public class TypeChecker implements CommandVisitor {
     
     @Override
     public void visit(Dereference node) {
-        throw new RuntimeException("Implement this");
+    	//node.expression().accept(this);
+    	check((Command) node.expression());
+    	put(node, getType((Command)node.expression()));
     }
 
     @Override
@@ -169,12 +237,14 @@ public class TypeChecker implements CommandVisitor {
 
     @Override
     public void visit(Assignment node) {
-        throw new RuntimeException("Implement this");
+        //throw new RuntimeException("Implement this");
     }
 
     @Override
     public void visit(Call node) {
-        throw new RuntimeException("Implement this");
+    	check(node.arguments());
+    	
+    	put(node, getType(node.arguments()));
     }
 
     @Override
@@ -189,7 +259,11 @@ public class TypeChecker implements CommandVisitor {
 
     @Override
     public void visit(Return node) {
-        throw new RuntimeException("Implement this");
+    	check((Command) node.argument());
+    	Type type = getType((Command) node.argument());
+    	
+    	put(node, type);
+    	
     }
 
     @Override

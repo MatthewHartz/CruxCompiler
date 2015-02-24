@@ -8,7 +8,7 @@ public abstract class Type {
         if (typeStr.equals("float")) return new FloatType();
         if (typeStr.equals("bool")) return new BoolType();
         if (typeStr.equals("void")) return new VoidType();
-        return new ErrorType("Unkown type: " + typeStr);
+        return new ErrorType("Unknown type: " + typeStr);
     }
     
     public Type add(Type that)

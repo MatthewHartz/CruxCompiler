@@ -7,7 +7,6 @@ public class ArrayType extends Type {
     
     public ArrayType(int extent, Type base)
     {
-        throw new RuntimeException("implement operators");
         this.extent = extent;
         this.base = base;
     }
@@ -22,10 +21,10 @@ public class ArrayType extends Type {
         return base;
     }
     
-    @override
-    public string tostring()
+    @Override
+    public String toString()
     {
-        return "array[" + extent "," + base + "]";
+        return "array[" + extent + "," + base + "]";
     }
     
     @Override

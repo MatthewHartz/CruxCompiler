@@ -7,7 +7,7 @@ public class FuncType extends Type {
    
    public FuncType(TypeList args, Type returnType)
    {
-      throw new RuntimeException("implement operators");
+      //throw new RuntimeException("implement operators");
       this.args = args;
       this.ret = returnType;
    }
