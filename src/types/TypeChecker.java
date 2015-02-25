@@ -10,6 +10,7 @@ public class TypeChecker implements CommandVisitor {
     
     private HashMap<Command, Type> typeMap;
     private StringBuffer errorBuffer;
+    private Type recentType;
 
     /* Useful error strings:
      *
@@ -215,12 +216,21 @@ public class TypeChecker implements CommandVisitor {
 
     @Override
     public void visit(LogicalOr node) {
-        throw new RuntimeException("Implement this");
+    	check((Command) node.leftSide());
+    	check((Command) node.rightSide());
+    	
+    	Type left = getType((Command) node.leftSide());
+    	Type right = getType((Command) node.rightSide());
+
+    	put(node, left.or(right));
     }
 
     @Override
     public void visit(LogicalNot node) {
-        throw new RuntimeException("Implement this");
+    	check((Command) node.expression());	
+    	Type type = getType((Command) node.expression());
+
+    	put(node, type.not());
     }
     
     @Override
