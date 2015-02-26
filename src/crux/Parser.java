@@ -30,9 +30,12 @@ public class Parser {
     	symbolTable = new SymbolTable();
     	symbolTable.insert("readInt");
     	symbolTable.insert("readFloat");
-    	symbolTable.insert("printBool");
-    	symbolTable.insert("printInt");
-    	symbolTable.insert("printFloat");
+    	symbolTable.insert("printBool")
+    		.setType(new VoidType());
+    	symbolTable.insert("printInt")
+    		.setType(new VoidType());
+    	symbolTable.insert("printFloat")
+    		.setType(new VoidType());
     	symbolTable.insert("println");
     }
     

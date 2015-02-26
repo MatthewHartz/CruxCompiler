@@ -35,11 +35,9 @@ public class BoolType extends Type {
     }
     
     @Override
-    public Type compare(Type that)
+    public Type call(Type args)
     {
-    	if (!(that instanceof BoolType))
-            return super.add(that);
-        return new BoolType();
+        return args;
     }
 
     @Override

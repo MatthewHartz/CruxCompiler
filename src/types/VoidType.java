@@ -13,6 +13,12 @@ public class VoidType extends Type {
     }
     
     @Override
+    public Type call(Type args)
+    {
+        return args;
+    }
+    
+    @Override
     public boolean equivalent(Type that)
     {
         if (that == null)

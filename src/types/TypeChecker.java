@@ -10,7 +10,7 @@ public class TypeChecker implements CommandVisitor {
     
     private HashMap<Command, Type> typeMap;
     private StringBuffer errorBuffer;
-    private Type recentType;
+    private Type returnType;
 
     /* Useful error strings:
      *
@@ -96,11 +96,14 @@ public class TypeChecker implements CommandVisitor {
     		
     		if (s instanceof ast.Return) {
     			Type type = getType((Command) s);
-        		put(node, type);
+    			
+    			if (type != null) {
+    				put(node, type);
+    			}
     		}
     	}
     	
-    	if (getType(node) == null) {
+    	if (getType(node) == null && returnType == null) {
     		put(node, new VoidType());
     	}
     }
@@ -143,12 +146,14 @@ public class TypeChecker implements CommandVisitor {
     	Symbol sym = node.symbol();
     	Type symType = sym.type();
     	
+    	returnType = null;
+    	
     	List<Symbol> parameters = node.arguments();
     	for (int i = 0; i < parameters.size(); i++) {
     		if (parameters.get(i).type() instanceof VoidType) {
-    			put(node, new ErrorType("Function " + sym.name() + " has an void argument in position " + i));
+    			put(node, new ErrorType("Function " + sym.name() + " has a void argument in position " + i));
     		} else if (parameters.get(i).type() instanceof ErrorType) {
-    			put(node, new ErrorType("Function " + sym.name() + " has an void argument in position " + i + ": " + ((ErrorType)parameters.get(i).type()).getMessage()));
+    			put(node, new ErrorType("Function " + sym.name() + " has an error argument in position " + i + ": " + ((ErrorType)parameters.get(i).type()).getMessage()));
     		}
 			types.append(parameters.get(i).type());
     	}
@@ -161,11 +166,15 @@ public class TypeChecker implements CommandVisitor {
     		check(node.body());
     		
     		Command returnNode = (Command)node.body();
-    		Type returnType = getType(returnNode);
+    		Type tempType = getType(returnNode);
+    		
+    		if (tempType == null) {
+    			tempType = returnType;
+    		}
         	
         	// check what was returned by function
-        	if (!symType.equivalent(returnType)) {
-        		put(returnNode, new ErrorType("Function " + sym.name() + " returns " + symType + " not " + returnType + "."));
+        	if (!symType.equivalent(tempType)) {
+        		put(returnNode, new ErrorType("Function " + sym.name() + " returns " + symType + " not " + tempType + "."));
         	} else {
         		put(node, new FuncType(types, symType));
         	}
@@ -174,7 +183,13 @@ public class TypeChecker implements CommandVisitor {
 
     @Override
     public void visit(Comparison node) {
-        throw new RuntimeException("Implement this");
+    	check((Command) node.leftSide());
+    	check((Command) node.rightSide());
+    	
+    	Type left = getType((Command) node.leftSide());
+    	Type right = getType((Command) node.rightSide());
+    	
+    	put(node, left.compare(right));
     }
     
     @Override
@@ -247,14 +262,30 @@ public class TypeChecker implements CommandVisitor {
 
     @Override
     public void visit(Assignment node) {
-        //throw new RuntimeException("Implement this");
+    	check((Command) node.destination());
+    	check((Command) node.source());
+    	
+    	Type destination = new AddressType(getType((Command) node.destination()));
+    	Type source = getType((Command) node.source());
+    	
+    	put(node, destination.assign(source));
     }
 
     @Override
     public void visit(Call node) {
-    	check(node.arguments());
+    	Symbol sym = node.function();
+    	Type retType = sym.type();
     	
-    	put(node, getType(node.arguments()));
+    	
+    	//for ()
+    	
+    	
+    	check(node.arguments());
+    	Type arguments = getType(node.arguments());
+    	
+    	//FuncType function = new FuncType((TypeList)arguments, retType);
+    	
+    	//put(node, function.call(arguments));
     }
 
     @Override
@@ -272,8 +303,11 @@ public class TypeChecker implements CommandVisitor {
     	check((Command) node.argument());
     	Type type = getType((Command) node.argument());
     	
-    	put(node, type);
-    	
+    	if (type instanceof ErrorType) {
+    		returnType = type;
+    	} else {
+    		put(node, type);
+    	}
     }
 
     @Override

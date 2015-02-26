@@ -46,6 +46,12 @@ public class FloatType extends Type {
             return super.compare(that);
         return new BoolType();
     }
+    
+    @Override
+    public Type call(Type args)
+    {
+        return args;
+    }
        
     @Override
     public boolean equivalent(Type that)

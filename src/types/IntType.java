@@ -53,4 +53,10 @@ public class IntType extends Type {
             return false;
         return true;
     }
+    
+    @Override
+    public Type call(Type args)
+    {
+        return args;
+    }
 }
