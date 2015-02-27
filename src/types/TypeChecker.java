@@ -365,12 +365,26 @@ public class TypeChecker implements CommandVisitor {
 
     @Override
     public void visit(IfElseBranch node) {
-        throw new RuntimeException("Implement this");
+    	check((Command) node.condition());
+    	Type type = getType((Command) node.condition());
+    	
+    	if (type.equivalent(new BoolType())) {
+    		put(node, type);
+    	} else {
+    		put(node, new ErrorType("IfElseBranch requires bool condition not " + type + "."));
+    	}
     }
 
     @Override
     public void visit(WhileLoop node) {
-        throw new RuntimeException("Implement this");
+    	check((Command) node.condition());
+    	Type type = getType((Command) node.condition());
+    	
+    	if (type.equivalent(new BoolType())) {
+    		put(node, type);
+    	} else {
+    		put(node, new ErrorType("WhileLoop requires bool condition not " + type + "."));
+    	}
     }
 
     @Override
