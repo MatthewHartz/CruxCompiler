@@ -137,12 +137,14 @@ public class TypeChecker implements CommandVisitor {
     		}
     	}
     	
-    	if (getType(node) == null && returnType == null) {
+    	Type type = getType(node);
+    	
+    	if (type == null && returnType == null) {
     		put(node, new VoidType());
     		satisfied = true;
     	}
     	
-    	if (getType(node).equivalent(new VoidType()) && currentFunction.function().type().equivalent(new VoidType())) {
+    	if (type != null && type.equivalent(new VoidType()) && currentFunction.function().type().equivalent(new VoidType())) {
     		put(node, new VoidType());
     		satisfied = true;
     	}
