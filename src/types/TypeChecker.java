@@ -147,8 +147,16 @@ public class TypeChecker implements CommandVisitor {
 
     @Override
     public void visit(VariableDeclaration node) {
-        //throw new RuntimeException("Implement this");
-    	put(node, node.symbol().type());
+    	Symbol sym = node.symbol();
+    	Type varType = sym.type();
+    	
+    	if (varType instanceof VoidType) {
+    		put(node, new ErrorType("Variable " + sym.name() + " has invalid type " + varType + "."));
+    	} else if (varType instanceof ErrorType) {
+    		put(node, new ErrorType("Variable " + sym.name() + " has invalid type " + varType + "."));
+    	} else {
+    		put(node, node.symbol().type());
+    	}
     }
 
     @Override
@@ -350,7 +358,7 @@ public class TypeChecker implements CommandVisitor {
     	    			put(node, new ErrorType("Function " + sym.name() + " has a void argument in position " + i));
     	    		} else if (parameters.get(i).type() instanceof ErrorType) {
     	    			put(node, new ErrorType("Function " + sym.name() + " has an error argument in position " + i + ": " + ((ErrorType)parameters.get(i).type()).getMessage()));
-    	    		}
+    	    		};
     	    		functionArguments.append(parameters.get(i).type());
     	    	}
     	    	
@@ -366,13 +374,19 @@ public class TypeChecker implements CommandVisitor {
     @Override
     public void visit(IfElseBranch node) {
     	check((Command) node.condition());
-    	Type type = getType((Command) node.condition());
+    	Type conditionType = getType((Command) node.condition());
     	
-    	if (type.equivalent(new BoolType())) {
-    		put(node, type);
-    	} else {
-    		put(node, new ErrorType("IfElseBranch requires bool condition not " + type + "."));
+    	if (!conditionType.equivalent(new BoolType())) {
+    		put(node, new ErrorType("IfElseBranch requires bool condition not " + conditionType + "."));
     	}
+    	
+    	check((Command) node.thenBlock());
+    	Type ifType = getType((Command) node.thenBlock());
+    	
+    	check((Command) node.elseBlock());
+    	Type elseType = getType((Command) node.elseBlock());
+    	
+    	put(node, conditionType);
     }
 
     @Override

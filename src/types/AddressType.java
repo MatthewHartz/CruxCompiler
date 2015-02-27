@@ -20,6 +20,15 @@ public class AddressType extends Type {
     {
         return "Address(" + base + ")";
     }
+    
+    @Override
+    public Type assign(Type source)
+    {
+        if (!(source instanceof AddressType) && !(source instanceof IntType))
+            return new ErrorType("Cannot assign " + source + " to " + this + ".");
+        
+        return this;
+    }
 
     @Override
     public boolean equivalent(Type that) {
