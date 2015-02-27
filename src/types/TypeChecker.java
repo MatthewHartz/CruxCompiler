@@ -10,6 +10,7 @@ public class TypeChecker implements CommandVisitor {
     
     private HashMap<Command, Type> typeMap;
     private StringBuffer errorBuffer;
+    private HashMap<String, Command> functionMap;
     private Type returnType;
 
     /* Useful error strings:
@@ -33,6 +34,7 @@ public class TypeChecker implements CommandVisitor {
     public TypeChecker()
     {
         typeMap = new HashMap<Command, Type>();
+        functionMap = new HashMap<String, Command>();
         errorBuffer = new StringBuffer();
     }
 
@@ -48,6 +50,16 @@ public class TypeChecker implements CommandVisitor {
             reportError(node.lineNumber(), node.charPosition(), ((ErrorType)type).getMessage());
         }
         typeMap.put(node, type);
+    }
+    
+    private void putFunction(String func, Command node)
+    {
+        functionMap.put(func, node);
+    }
+    
+    private void getFunction(String func)
+    {
+        functionMap.get(func);
     }
     
     public Type getType(Command node)
@@ -73,11 +85,15 @@ public class TypeChecker implements CommandVisitor {
 
     @Override
     public void visit(ExpressionList node) {
+    	TypeList types = new TypeList();
+    	
     	for (Expression e : node) {
     		check((Command) e);
     		Type type = getType((Command) e);
-    		put(node, type);
+    		types.append(type);
     	}
+    	
+    	put(node, types);
     }
 
     @Override
@@ -142,12 +158,11 @@ public class TypeChecker implements CommandVisitor {
 
     @Override
     public void visit(FunctionDefinition node) {
-    	TypeList types = new TypeList();
     	Symbol sym = node.symbol();
     	Type symType = sym.type();
-    	
     	returnType = null;
-    	
+    	TypeList types = new TypeList();
+    		
     	List<Symbol> parameters = node.arguments();
     	for (int i = 0; i < parameters.size(); i++) {
     		if (parameters.get(i).type() instanceof VoidType) {
@@ -177,6 +192,7 @@ public class TypeChecker implements CommandVisitor {
         		put(returnNode, new ErrorType("Function " + sym.name() + " returns " + symType + " not " + tempType + "."));
         	} else {
         		put(node, new FuncType(types, symType));
+        		putFunction(sym.name(), node);
         	}
     	}
     }
@@ -205,17 +221,35 @@ public class TypeChecker implements CommandVisitor {
     
     @Override
     public void visit(Subtraction node) {
-        throw new RuntimeException("Implement this");
+    	check((Command) node.leftSide());
+    	check((Command) node.rightSide());
+    	
+    	Type left = getType((Command) node.leftSide());
+    	Type right = getType((Command) node.rightSide());
+
+    	put(node, left.sub(right));
     }
     
     @Override
     public void visit(Multiplication node) {
-        throw new RuntimeException("Implement this");
+    	check((Command) node.leftSide());
+    	check((Command) node.rightSide());
+    	
+    	Type left = getType((Command) node.leftSide());
+    	Type right = getType((Command) node.rightSide());
+
+    	put(node, left.mul(right));
     }
     
     @Override
     public void visit(Division node) {
-        throw new RuntimeException("Implement this");
+    	check((Command) node.leftSide());
+    	check((Command) node.rightSide());
+    	
+    	Type left = getType((Command) node.leftSide());
+    	Type right = getType((Command) node.rightSide());
+
+    	put(node, left.div(right));
     }
     
     @Override
@@ -274,18 +308,59 @@ public class TypeChecker implements CommandVisitor {
     @Override
     public void visit(Call node) {
     	Symbol sym = node.function();
+    	String funcName = sym.name();
     	Type retType = sym.type();
     	
+    	FunctionDefinition matchingFunction = null;
+    	TypeList functionArguments = new TypeList();
+    	Type matchingFunctionType = null;
     	
-    	//for ()
-    	
-    	
+    	switch (funcName) {
+    		case "readInt":
+    			matchingFunctionType = new IntType();
+    			break;
+    		case "readFloat":
+    			matchingFunctionType = new FloatType();
+    			break;
+    		case "printBool":
+    			functionArguments.append(new BoolType());
+    			matchingFunctionType = new VoidType();
+    			break;
+    		case "printInt":
+    			functionArguments.append(new IntType());
+    			matchingFunctionType = new VoidType();
+    			break;
+    		case "printFloat":
+    			functionArguments.append(new FloatType());
+    			matchingFunctionType = new VoidType();
+    			break;
+    		case "println":
+    			matchingFunctionType = new VoidType();
+    			break;
+    		default:
+    			matchingFunction = (FunctionDefinition) functionMap.get(funcName);	
+    			
+    			if (matchingFunction == null) {
+    	    		return;
+    	    	}    			
+    			
+    			List<Symbol> parameters = matchingFunction.arguments();
+    	    	for (int i = 0; i < parameters.size(); i++) {
+    	    		if (parameters.get(i).type() instanceof VoidType) {
+    	    			put(node, new ErrorType("Function " + sym.name() + " has a void argument in position " + i));
+    	    		} else if (parameters.get(i).type() instanceof ErrorType) {
+    	    			put(node, new ErrorType("Function " + sym.name() + " has an error argument in position " + i + ": " + ((ErrorType)parameters.get(i).type()).getMessage()));
+    	    		}
+    	    		functionArguments.append(parameters.get(i).type());
+    	    	}
+    	    	
+    	    	matchingFunctionType = matchingFunction.function().type();
+    	}
+    
     	check(node.arguments());
-    	Type arguments = getType(node.arguments());
-    	
-    	//FuncType function = new FuncType((TypeList)arguments, retType);
-    	
-    	//put(node, function.call(arguments));
+    	TypeList callArguments = (TypeList)getType(node.arguments());
+		    	
+    	put(node, new FuncType(functionArguments, matchingFunctionType).call(callArguments));
     }
 
     @Override

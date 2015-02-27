@@ -1,14 +1,11 @@
-// test return type matches function
-
-func myInt(a:int) : int {
-  return a;
-}
-
-func myIntError(a:float) : int {
-  return a;
-}
+// test if-else requires boolean condition
 
 func main() : void {
-  ::myInt(7);
-  ::myIntError(7.0);
+  var i:int;
+  var f:float;
+  var b:bool;
+
+  if (i) { ::printInt(7); }
+  if (f) { ::printInt(8); }
+  if (b) { ::printInt(9); }
 }

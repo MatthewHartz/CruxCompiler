@@ -23,6 +23,16 @@ public class FuncType extends Type {
    }
    
    @Override
+   public Type call(Type args)
+   {
+       if (!args.equivalent(this.args)) {
+    	   return new ErrorType("Cannot call " + this.toString() + " using " + args.toString() + ".");
+       }
+       
+       return this.returnType();
+   }
+   
+   @Override
    public String toString()
    {
       return "func(" + args + "):" + ret;
