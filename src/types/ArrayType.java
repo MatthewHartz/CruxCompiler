@@ -30,7 +30,8 @@ public class ArrayType extends Type {
     @Override
     public Type index(Type that)
     {
-        return new ErrorType("Cannot index " + this + " with " + that + ".");
+        //return new ErrorType("Cannot index " + this + " with " + that + ".");
+    	return base;
     }
     
     @Override
@@ -38,7 +39,7 @@ public class ArrayType extends Type {
     {
         if (that == null)
             return false;
-        if (!(that instanceof IntType))
+        if (!(that instanceof ArrayType))
             return false;
         
         ArrayType aType = (ArrayType)that;

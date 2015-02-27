@@ -230,6 +230,16 @@ public class Parser {
         //return false;
     }
     
+    private Integer expectInteger(Token.Kind kind)
+    {
+    	Token tok = currentToken;
+        if (accept(kind))
+            return Integer.parseInt(tok.lexeme());
+        String errorMessage = reportSyntaxError(kind);
+        throw new QuitParseException(errorMessage);
+        //return false;
+    }
+    
     private Token expectRetrieve(Token.Kind kind)
     {
         Token tok = currentToken;
@@ -514,23 +524,42 @@ public class Parser {
     	int lineNum = lineNumber();
     	int charPos = charPosition();
     	
+    	List<Integer> extents = new ArrayList<Integer>();
+    	
     	expect(Token.Kind.ARRAY);
     	Token id = expectRetrieve(Token.Kind.IDENTIFIER);
     	Symbol sym = tryDeclareSymbol(id);
     	expect(Token.Kind.COLON);
-    	sym.setType(type());
+    	//sym.setType(type());
+    	
+    	Type type = type();
+    	
     	expect(Token.Kind.OPEN_BRACKET);
-    	expect(Token.Kind.INTEGER);
+    	int temp = expectInteger(Token.Kind.INTEGER);
+    	extents.add(temp);
     	expect(Token.Kind.CLOSE_BRACKET);
     	
     	while(accept(Token.Kind.OPEN_BRACKET)) {
-    		expect(Token.Kind.INTEGER);
+    		temp = expectInteger(Token.Kind.INTEGER);
+    		extents.add(temp);
     		expect(Token.Kind.CLOSE_BRACKET);
     	}
     	
     	expect(Token.Kind.SEMICOLON);
     	
-    	return new ast.ArrayDeclaration(lineNum, charPos, sym);
+    	Type array = null;
+
+    	for (int i = extents.size() - 1; i >= 0; i--) {
+    		if (array == null) {
+    			array = new ArrayType(extents.get(i), type);
+    		} else {
+    			array = new ArrayType(extents.get(i), array);
+    		}
+    	}
+    	
+    	sym.setType(array);
+    	
+    	return new ast.ArrayDeclaration(lineNum, charPos, sym, extents);
     }
     
     // should be done

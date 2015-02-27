@@ -191,12 +191,17 @@ public class TypeChecker implements CommandVisitor {
     @Override
     public void visit(ArrayDeclaration node) {
     	Symbol sym = node.symbol();
+    	Type type = node.symbol().type();
     	
+    	while (type instanceof ArrayType) {
+    		ArrayType base = (ArrayType) type;
+    		type = base.base();
+    	}
     	
-    	
-    	
-    	//"Array " + arrayName + " has invalid base type " + baseType + "."
-    	put(node, new VoidType());
+    	if (type instanceof VoidType) 
+    		put(node, new ErrorType("Array " + sym.name() + " has invalid base type " + type + "."));
+    	else
+    		put(node, node.symbol().type());
     }
 
     @Override
@@ -345,7 +350,7 @@ public class TypeChecker implements CommandVisitor {
     	Type baseType = getType((Command)node.base());
     	
     	
-    	//put(node, getType((Command)node.expression()));
+    	put(node, baseType);
     }
 
     @Override
