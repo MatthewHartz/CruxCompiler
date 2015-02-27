@@ -161,7 +161,13 @@ public class TypeChecker implements CommandVisitor {
 
     @Override
     public void visit(ArrayDeclaration node) {
-        throw new RuntimeException("Implement this");
+    	Symbol sym = node.symbol();
+    	
+    	
+    	
+    	
+    	//"Array " + arrayName + " has invalid base type " + baseType + "."
+    	put(node, new VoidType());
     }
 
     @Override
@@ -299,7 +305,14 @@ public class TypeChecker implements CommandVisitor {
 
     @Override
     public void visit(Index node) {
-        throw new RuntimeException("Implement this");
+    	check((Command) node.amount());
+    	Type amountType = getType((Command)node.amount());
+    	
+    	check((Command) node.base());
+    	Type baseType = getType((Command)node.base());
+    	
+    	
+    	//put(node, getType((Command)node.expression()));
     }
 
     @Override
@@ -394,11 +407,11 @@ public class TypeChecker implements CommandVisitor {
     	check((Command) node.condition());
     	Type type = getType((Command) node.condition());
     	
-    	if (type.equivalent(new BoolType())) {
-    		put(node, type);
-    	} else {
+    	if (!type.equivalent(new BoolType())) {
     		put(node, new ErrorType("WhileLoop requires bool condition not " + type + "."));
-    	}
+    		
+    	} 
+    	put(node, type);
     }
 
     @Override

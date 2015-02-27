@@ -28,9 +28,9 @@ public class ArrayType extends Type {
     }
     
     @Override
-    public Type call(Type args)
+    public Type index(Type that)
     {
-        return args;
+        return new ErrorType("Cannot index " + this + " with " + that + ".");
     }
     
     @Override
