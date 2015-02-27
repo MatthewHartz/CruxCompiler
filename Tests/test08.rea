@@ -1,22 +1,31 @@
 ast.DeclarationList(3,1)
-  ast.FunctionDefinition(3,1)[Symbol(main), []]
+  ast.FunctionDefinition(3,1)[Symbol(andInt:bool), [Symbol(a:int), Symbol(b:int)]]
     ast.StatementList(4,3)
-      ast.VariableDeclaration(4,3)[Symbol(x)]
-      ast.WhileLoop(6,3)
-        ast.Dereference(6,10)
-          ast.AddressOf(6,10)[x]
-        ast.StatementList(7,5)
-          ast.Call(7,5)[Symbol(println)]
-            ast.ExpressionList(7,15)
-          ast.Call(8,5)[Symbol(printBool)]
-            ast.ExpressionList(8,17)
-              ast.Dereference(8,17)
-                ast.AddressOf(8,17)[x]
-          ast.Assignment(9,5)
-            ast.AddressOf(9,9)[x]
-            ast.LogicalNot(9,13)
-              ast.Dereference(9,17)
-                ast.AddressOf(9,17)[x]
-      ast.Call(11,3)[Symbol(println)]
-        ast.ExpressionList(11,13)
+      ast.Return(4,3)
+        ast.LogicalAnd(4,12)
+          ast.Dereference(4,10)
+            ast.AddressOf(4,10)[a]
+          ast.Dereference(4,16)
+            ast.AddressOf(4,16)[b]
+  ast.FunctionDefinition(7,1)[Symbol(andFloat:bool), [Symbol(a:float), Symbol(b:float)]]
+    ast.StatementList(8,3)
+      ast.Return(8,3)
+        ast.LogicalAnd(8,12)
+          ast.Dereference(8,10)
+            ast.AddressOf(8,10)[a]
+          ast.Dereference(8,16)
+            ast.AddressOf(8,16)[b]
+  ast.FunctionDefinition(11,1)[Symbol(andBool:bool), [Symbol(a:bool), Symbol(b:bool)]]
+    ast.StatementList(12,3)
+      ast.Return(12,3)
+        ast.LogicalAnd(12,12)
+          ast.Dereference(12,10)
+            ast.AddressOf(12,10)[a]
+          ast.Dereference(12,16)
+            ast.AddressOf(12,16)[b]
+  ast.FunctionDefinition(15,1)[Symbol(main:void), []]
+    ast.StatementList(16,3)
+      ast.Call(16,3)[Symbol(printBool:void)]
+        ast.ExpressionList(16,15)
+          ast.LiteralBool(16,15)[TRUE]
 

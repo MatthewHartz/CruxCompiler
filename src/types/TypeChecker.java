@@ -12,6 +12,8 @@ public class TypeChecker implements CommandVisitor {
     private StringBuffer errorBuffer;
     private HashMap<String, Command> functionMap;
     private Type returnType;
+    private Type blockType;
+    private FunctionDefinition currentFunction;
 
     /* Useful error strings:
      *
@@ -100,13 +102,16 @@ public class TypeChecker implements CommandVisitor {
     public void visit(DeclarationList node) {
     	for (Declaration d : node) {
     		check((Command) d);
-	    	Type type = getType((Command) d);
-			put(node, type);
+	    	//Type type = getType((Command) d);
+			//put(node, type);
     	}
     }
 
     @Override
     public void visit(StatementList node) {
+    	Boolean satisfied = false;
+    	blockType = null;
+    	
     	for (Statement s : node) {
     		check((Command) s);
     		
@@ -115,18 +120,40 @@ public class TypeChecker implements CommandVisitor {
     			
     			if (type != null) {
     				put(node, type);
+    				satisfied = true;   				
+    			} else if (returnType != null) {
+    				satisfied = true;
+    			}
+    		} else if (s instanceof ast.WhileLoop) {
+    			put(node, new VoidType());
+    		} else if (s instanceof ast.IfElseBranch) {
+    			Type t = getType((Command)s);
+    			if (!t.equivalent(new VoidType())) {
+    				put(node, t);
+    				satisfied = true;
+    			} else {
+    				put(node, t);
     			}
     		}
     	}
     	
     	if (getType(node) == null && returnType == null) {
     		put(node, new VoidType());
+    		satisfied = true;
+    	}
+    	
+    	if (getType(node).equivalent(new VoidType()) && currentFunction.function().type().equivalent(new VoidType())) {
+    		put(node, new VoidType());
+    		satisfied = true;
+    	}
+    	
+    	if (!satisfied) {
+    		blockType = new ErrorType("Not all paths in function " + currentFunction.function().name() + " have a return.");
     	}
     }
 
     @Override
     public void visit(AddressOf node) {
-    	//put(node, new AddressType(node.symbol().type()));
     	put(node, node.symbol().type());
     }
 
@@ -192,6 +219,7 @@ public class TypeChecker implements CommandVisitor {
     			!(sym.type() instanceof VoidType)) {
     		put(node, new ErrorType("Function main has invalid signature."));
     	} else {
+    		currentFunction = node;    		
     		check(node.body());
     		
     		Command returnNode = (Command)node.body();
@@ -202,7 +230,10 @@ public class TypeChecker implements CommandVisitor {
     		}
         	
         	// check what was returned by function
-        	if (!symType.equivalent(tempType)) {
+    		if (blockType != null) {
+    			put(node, blockType);
+    		}
+    		else if (!symType.equivalent(tempType)) {
         		put(returnNode, new ErrorType("Function " + sym.name() + " returns " + symType + " not " + tempType + "."));
         	} else {
         		put(node, new FuncType(types, symType));
@@ -386,6 +417,8 @@ public class TypeChecker implements CommandVisitor {
 
     @Override
     public void visit(IfElseBranch node) {
+    	FunctionDefinition currentFunc = currentFunction;
+    	
     	check((Command) node.condition());
     	Type conditionType = getType((Command) node.condition());
     	
@@ -396,10 +429,22 @@ public class TypeChecker implements CommandVisitor {
     	check((Command) node.thenBlock());
     	Type ifType = getType((Command) node.thenBlock());
     	
+    	if (!(ifType instanceof VoidType) && !(currentFunc.function().type().equivalent(ifType))) {
+    		put(node.thenBlock(), new ErrorType("Type doesn't match return type"));
+    	}
+    	
     	check((Command) node.elseBlock());
     	Type elseType = getType((Command) node.elseBlock());
     	
-    	put(node, conditionType);
+    	if (!(elseType instanceof VoidType) && !(currentFunc.function().type().equivalent(elseType))) {
+    		put(node.thenBlock(), new ErrorType("Type doesn't match return type"));
+    	}
+    	
+    	if (ifType.equivalent(new VoidType()) || elseType.equivalent(new VoidType())) {
+    		put(node, new VoidType());
+    	} else {
+        	put(node, conditionType);
+    	}
     }
 
     @Override

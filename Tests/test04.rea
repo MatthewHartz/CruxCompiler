@@ -1,15 +1,14 @@
 ast.DeclarationList(3,1)
-  ast.ArrayDeclaration(3,1)[Symbol(x)]
-  ast.FunctionDefinition(5,1)[Symbol(main), []]
-    ast.StatementList(6,3)
-      ast.Call(6,3)[Symbol(printInt)]
-        ast.ExpressionList(6,14)
-          ast.Dereference(6,14)
-            ast.Index(6,22)
-              ast.Index(6,19)
-                ast.Index(6,16)
-                  ast.AddressOf(6,14)[x]
-                  ast.LiteralInt(6,16)[2]
-                ast.LiteralInt(6,19)[3]
-              ast.LiteralInt(6,22)[4]
+  ast.FunctionDefinition(3,1)[Symbol(foo:void), [Symbol(a:void)]]
+    ast.StatementList(4,3)
+      ast.Return(4,3)
+        ast.Call(4,10)[Symbol(foo:void)]
+          ast.ExpressionList(4,16)
+            ast.Dereference(4,16)
+              ast.AddressOf(4,16)[a]
+  ast.FunctionDefinition(7,1)[Symbol(main:void), []]
+    ast.StatementList(8,3)
+      ast.Call(8,3)[Symbol(printInt:void)]
+        ast.ExpressionList(8,14)
+          ast.LiteralInt(8,14)[7]
 

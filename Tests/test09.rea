@@ -1,11 +1,22 @@
 ast.DeclarationList(3,1)
-  ast.FunctionDefinition(3,1)[Symbol(main), []]
+  ast.FunctionDefinition(3,1)[Symbol(main:void), []]
     ast.StatementList(4,3)
-      ast.IfElseBranch(4,3)
-        ast.LiteralBool(4,11)[TRUE]
-        ast.StatementList(5,5)
-          ast.Call(5,5)[Symbol(printInt)]
-            ast.ExpressionList(5,16)
-              ast.LiteralInt(5,16)[5]
-        ast.StatementList(7,1)
+      ast.VariableDeclaration(4,3)[Symbol(i:int)]
+      ast.VariableDeclaration(5,3)[Symbol(f:float)]
+      ast.VariableDeclaration(6,3)[Symbol(b:bool)]
+      ast.Call(8,3)[Symbol(printBool:void)]
+        ast.ExpressionList(8,15)
+          ast.LogicalNot(8,15)
+            ast.Dereference(8,19)
+              ast.AddressOf(8,19)[i]
+      ast.Call(9,3)[Symbol(printBool:void)]
+        ast.ExpressionList(9,15)
+          ast.LogicalNot(9,15)
+            ast.Dereference(9,19)
+              ast.AddressOf(9,19)[f]
+      ast.Call(10,3)[Symbol(printBool:void)]
+        ast.ExpressionList(10,15)
+          ast.LogicalNot(10,15)
+            ast.Dereference(10,19)
+              ast.AddressOf(10,19)[b]
 
